@@ -4,7 +4,7 @@ Multi-locus bootstrapping
 This simple script creates the sets of bootstrap replicates for multi-locus bootstrapping. It can create replicates for both site-only and gene/site resampling strategies (see [Seo, 2008](http://www.ncbi.nlm.nih.gov/pubmed/18281270)). 
 
 ### How does this work?
-Multi-locus bootstrapping as implemented in this package works as follows. Imagine you have genes `g1` to `gk` and also imagine for each gene, you have performed bootstrapping. This script assumes you have a directory (say `dir`) under which there is one directory for each gene (say `g1` to `gk`), and under each `dir/gi` directory, you have a file (say `dir/gi/bootstrap`) that includes `n` the bootstrap replicates for that gene. For the gene-only strategy you need only the reconstructed tree from a MSA without bootstraping (say `dir/gi/bestree`). Also imagine we want to do `m <= n` replicates of multi-locus bootstrapping.
+Multi-locus bootstrapping as implemented in this package works as follows. Imagine you have genes `g1` to `gk` and also imagine for each gene, you have performed bootstrapping. This script assumes you have a directory (say `dir`) under which there is one directory for each gene (say `g1` to `gk`), and under each `dir/gi` directory, you have a file (say `dir/gi/bootstrap`) that includes `n` the bootstrap replicates for that gene. For the gene-only strategy you need only the reconstructed tree from an MSA without bootstraping (say `dir/gi/bestree`). Also imagine we want to do `m <= n` replicates of multi-locus bootstrapping.
 
 **site-only resampling:**  When site-only resampling is used, we simply create the following files:
 
