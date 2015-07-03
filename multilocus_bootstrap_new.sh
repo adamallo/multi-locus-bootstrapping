@@ -10,13 +10,13 @@ $0 [number of bootstraps] [dir] [FILENAME] [outdir] [outname] [sampling] [weight
 
    dir: should be a directory that includes only one directory per gene
 
-   FILENAME: dir/*/FILENAME should give the name of gene tree  bootstrap files (one file per gene)
+   FILENAME: dir/*/FILENAME should give the name of gene tree input files (one file per gene) (bootstrap trees for site-only and gene/site, bestml trees for gene-only sampling strategy)
 
    outdir: is where the results will be placed
 
    outname: is the prefix of the output files
 
-   sampling: can be either site or genesite (for site-only and gene/site resampling respectively). 
+   sampling: can be either site, genesite or gene (for site-only, gene/site or gene-only resampling). 
 
    weightfile: if - is given, it's ignored; otherwise, each gene is multiplied by the number of lines in weightfile under dir/*
    
@@ -32,16 +32,39 @@ sampling=$6
 weightfile=$7
 seed=$RANDOM
 test $# -gt 7 && seed=$8
+RANDOM=$seed
 
 echo seed is $seed 
 
 mkdir -p $outdir
 
+if [[ "$sampling" == "gene" ]]
+then
+trees=($d/*)
+n_trees=${#trees[@]}
+for x in $(seq 1 1 $1);
+do
+	awk_seed=$RANDOM	
+	id_trees=($(awk -v seed=$awk_seed -v n=$n_trees --source 'BEGIN{srand(seed);for (i=0;i<n;++i){print int(rand() * n)}}')) #From 0 to n-1
 
+	for ((i=0;i<$n_trees;++i))
+	do
+		if [[ ! -f ${trees[${id_trees[$i]}]}/$3 ]]
+		then
+			echo "${trees[${id_trees[$i]}]}/$3 file is not available, please, check your input folder and input name"
+		else
+        		cat ${trees[${id_trees[$i]}]}/$3 >> $outdir/$outname.$x;
+		fi
+	done
+done
+
+echo "Done!"
+else
 for x in $(seq 1 1 $1); do >$outdir/$outname.$x; done
 
 assign=`python $H/mlbs-gene-sampling.py $1 $seed $3 $sampling $d/*`
 test $? == 0 || exit 1
+echo "${assign}"
 while read b c; do
    n=0
    yd=$d/$b
@@ -71,3 +94,4 @@ done < <(echo "${assign}")
 #test "`wc -l $outdir/$outname.$x|tail -n1`" == "$(($1 * f)) total" || exit 1
 
 echo "Done!"
+fi

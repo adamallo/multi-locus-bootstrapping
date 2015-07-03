@@ -4,7 +4,7 @@ Multi-locus bootstrapping
 This simple script creates the sets of bootstrap replicates for multi-locus bootstrapping. It can create replicates for both site-only and gene/site resampling strategies (see [Seo, 2008](http://www.ncbi.nlm.nih.gov/pubmed/18281270)). 
 
 ### How does this work?
-Multi-locus bootstrapping as implemented in this package works as follows. Imagine you have genes `g1` to `gk` and also imagine for each gene, you have performed bootstrapping. This script assumes you have a directory (say `dir`) under which there is one directory for each gene (say `g1` to `gk`), and under each `dir/gi` directory, you have a file (say `dir/gi/bootstrap`) that includes `n` the bootstrap replicates for that gene. Also imagine we want to do `m <= n` replicates of multi-locus bootstrapping. 
+Multi-locus bootstrapping as implemented in this package works as follows. Imagine you have genes `g1` to `gk` and also imagine for each gene, you have performed bootstrapping. This script assumes you have a directory (say `dir`) under which there is one directory for each gene (say `g1` to `gk`), and under each `dir/gi` directory, you have a file (say `dir/gi/bootstrap`) that includes `n` the bootstrap replicates for that gene. For the gene-only strategy you need only the reconstructed tree from a MSA without bootstraping (say `dir/gi/bestree`). Also imagine we want to do `m <= n` replicates of multi-locus bootstrapping.
 
 **site-only resampling:**  When site-only resampling is used, we simply create the following files:
 
@@ -30,6 +30,17 @@ For example, if `g1` is sampled three times for `BS.1`, never for `BS.2`, and tw
 
 Thus, here, the number of bootstrap replicates selected from each gene is varied from one multi-locus bootstrap replicate to the next. However, each `BS.i` is guaranteed to have `k` lines in it. Also note that since some genes will be by chance selected more often than others, we need that `m < n`. For example, with `n = 200`, usually `m` can be at most around 160. 
 
+**gene-only resampling:**  When gene-only resampling is used, for each bootstrap replicate, `k` genes are selected at random with replacement (given a random seed number), adding the tree obtained without bootstraping to the sample. For example, if `g1` is sampled three times for `BS.1`, never for `BS.2`, and twice for `BS.3` and `g2` was sampled once for `BS.1`, three times for `BS.2`, and twice for `BS.3`we will have something like:
+
+```
+    BS.1:  g1[1] g1[1] g1[1] g2[1] ... 
+    BS.2:  g2[1] g2[1] g2[1] ... 
+    BS.2:  g1[1] g1[1] g2[1] g2[1] ... 
+    ...
+    BS.m: ...
+```
+Thus, here, the number of bootstrap replicates selected from each gene is varied from one multi-locus bootstrap replicate to the next. However, each `BS.i` is guaranteed to have `k` lines in it.
+
 ### Code Usage:
 
 To run the code, execute:
@@ -40,10 +51,10 @@ To run the code, execute:
 where:
 
    - `dir`: should be a directory that includes only one directory per gene
-   - `FILENAME`: `dir/*/FILENAME` should give the name of gene tree  bootstrap files (one file per gene, and one line per gene bootstrap replicate in each file)
+   - `FILENAME`: `dir/*/FILENAME` should give the name of gene tree input files (one file per gene, and one line per gene bootstrap replicate in each file (or only the tree estimated with the original alignment for the gene-only alternative))
    - `outdir`: is where the results will be placed
    - `outname`: is the prefix of the outuput files
-   - `sampling`: can be either `site` or `genesite` (for site-only and gene/site resampling respectively).
+   - `sampling`: can be either `site`, `genesite` or `gene` (for site-only, gene/site and gene-only resampling ).
    - `weightfile`: if anything other than `-` is given, each gene `go` is multiplied by the number of lines in `dir/gi/weightfile`. This is useful to upweight or down weight some genes. 
    - `seed`: a random seed number (leave blank and it will use `$RANDOM`)
 
@@ -56,4 +67,3 @@ For example,
 will create 160 bootstrap replicate files under `mlbs/BS.1` to `mlbs/BS.160` using gene bootstrap files under `allgenes/*/raxmlboot/RAxML_bootstrap.allbs`. It will use gene/site resampling, without any gene weighting, and will use 424 as the random seed value. As it runs, it also tells you how many times each gene is sampled overall and what is the weight of that gene (1 for all genes means no weighting is used).
 
 ---
-Report bugs or questions to `smirarab@gmail.com`.
